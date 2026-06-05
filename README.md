@@ -19,6 +19,30 @@ An automated knee MRI segmentation and radiomics analysis toolkit. It fuses dual
 
 ---
 
+## Input Orientation Convention
+
+Before running the pipeline, all input knee MRI volumes should be standardized to a **right-knee orientation**. If the original scan is from a left knee, it should be mirrored to match the right-knee anatomical convention before segmentation, ROI generation, lateral/medial splitting, and radiomics extraction.
+
+In this repository, the NIfTI array axes are interpreted as follows:
+
+| NIfTI axis | Anatomical plane |
+| ---------- | ---------------- |
+| x          | coronal          |
+| y          | axial            |
+| z          | sagittal         |
+
+Therefore, `xyz` in this pipeline refers to the NIfTI array-axis order:
+
+```text
+x = coronal
+y = axial
+z = sagittal
+```
+
+This convention is important because the downstream lateral/medial compartment splitting assumes a consistent left-right anatomical orientation across cases. Mixing native left-knee and right-knee scans without mirroring may lead to incorrect lateral/medial labels.
+
+---
+
 ## File List
 
 ```
@@ -184,8 +208,8 @@ For each case, `run_batch_cases.py` generates the following in `out_root/<case_i
 1. Use tibial cartilage (or subchondral tibia) as the reference region.
 2. Apply PCA to the world coordinates of the reference voxels to estimate the approximate SI axis.
 3. Project onto the perpendicular plane and perform K-Means clustering (k=2) to obtain lateral and medial groups.
-4. Automatically infer L/R from the filename, or specify it manually.
-5. Apply the clustering model to all ROIs (cartilage + subchondral bone bands) to complete the lateral/medial split.
+4. The algorithm assumes that all cases have been standardized to a right-knee orientation before splitting. Filename-based L/R inference is only retained for compatibility or manual checking.
+5. 5. Apply the clustering model to all ROIs (cartilage + subchondral bone bands) to complete the lateral/medial split.
 
 ---
 
